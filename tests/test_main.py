@@ -65,8 +65,13 @@ def test_webhook_endpoint_receives_event(
 
     assert body["event"] == "pull_request"
     assert body["pull_request"]["pr_number"] == 42
-    assert body["analysis"]["regression"] is True
-    assert body["analysis"]["severity"] == "medium"
+    assert body["analysis"]["regression_detected"] is True
+    assert len(body["analysis"]["metrics"]) == 3
+
+    latency_metric = body["analysis"]["metrics"][0]
+
+    assert latency_metric["metric"] == "latency_ms"
+    assert latency_metric["severity"] == "high"
     assert "Benchmark Guardian Report" in body["report"]
 
     mock_get_installation_access_token.assert_called_once_with(123456)

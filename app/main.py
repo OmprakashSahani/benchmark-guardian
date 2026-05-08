@@ -15,7 +15,11 @@ from app.repositories.benchmark_repository import (
 )
 from app.security.webhook import verify_github_signature
 from app.services.benchmark import detect_regression
-from app.services.report import format_regression_report
+from app.analysis.multimetric import analyze_benchmark_metrics
+from app.services.report import (
+    format_multi_metric_report,
+    format_regression_report,
+)
 
 app = FastAPI()
 
@@ -54,13 +58,26 @@ async def github_webhook(request: Request):
     if event == "pull_request":
         pr_data = parse_pull_request_event(payload)
 
-        benchmark_result = detect_regression(
-            baseline=100.0,
-            current=112.0,
-            threshold_percent=5.0,
+        baseline_metrics = {
+            "latency_ms": 100,
+            "memory_mb": 2048,
+            "throughput": 512,
+        }
+
+        current_metrics = {
+            "latency_ms": 118,
+            "memory_mb": 2500,
+            "throughput": 470,
+        }
+
+        benchmark_result = analyze_benchmark_metrics(
+            baseline_metrics,
+            current_metrics,
         )
 
-        report = format_regression_report(benchmark_result)
+        report = format_multi_metric_report(
+            benchmark_result
+        )
 
         if pr_data["installation_id"] is not None:
             access_token = get_installation_access_token(
