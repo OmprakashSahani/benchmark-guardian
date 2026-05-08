@@ -42,11 +42,12 @@ def test_analyze_endpoint_detects_regression():
     body = response.json()
 
     assert body["analysis"] == {
-        "baseline": 100.0,
-        "current": 112.0,
-        "change_percent": 12.0,
-        "regression": True,
-    }
+    "baseline": 100.0,
+    "current": 112.0,
+    "change_percent": 12.0,
+    "regression": True,
+    "severity": "medium",
+}
 
     assert "Benchmark Guardian Report" in body["report"]
     assert "Regression detected" in body["report"]
