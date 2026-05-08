@@ -11,6 +11,9 @@ def test_parse_pull_request_event():
         "repository": {
             "full_name": "OmprakashSahani/benchmark-guardian",
         },
+        "installation": {
+            "id": 123456,
+        },
     }
 
     result = parse_pull_request_event(payload)
@@ -20,4 +23,5 @@ def test_parse_pull_request_event():
         "pr_number": 42,
         "pr_title": "Improve benchmark engine",
         "repository_name": "OmprakashSahani/benchmark-guardian",
+        "installation_id": 123456,
     }
