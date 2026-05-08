@@ -1,14 +1,15 @@
 from fastapi import FastAPI, Request
-from app.services.benchmark import detect_regression
-from app.services.report import format_regression_report
-from app.github.parser import parse_pull_request_event
-from app.db.database import initialize_database
 
+from app.db.database import initialize_database
+from app.github.parser import parse_pull_request_event
 from app.models.benchmark import (
     AnalyzeResponse,
     BenchmarkAnalysis,
     BenchmarkRequest,
 )
+from app.repositories.benchmark_repository import save_benchmark_run
+from app.services.benchmark import detect_regression
+from app.services.report import format_regression_report
 
 app = FastAPI()
 
@@ -19,14 +20,14 @@ initialize_database()
 def root():
     return {
         "app": "Benchmark Guardian",
-        "status": "running"
+        "status": "running",
     }
 
 
 @app.get("/health")
 def health():
     return {
-        "healthy": True
+        "healthy": True,
     }
 
 
@@ -69,6 +70,8 @@ async def analyze_benchmark(payload: BenchmarkRequest):
     )
 
     report = format_regression_report(result)
+
+    save_benchmark_run(result)
 
     return {
         "analysis": BenchmarkAnalysis(**result),
