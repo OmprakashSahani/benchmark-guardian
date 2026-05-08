@@ -7,7 +7,10 @@ from app.models.benchmark import (
     BenchmarkAnalysis,
     BenchmarkRequest,
 )
-from app.repositories.benchmark_repository import save_benchmark_run
+from app.repositories.benchmark_repository import (
+    get_benchmark_runs,
+    save_benchmark_run,
+)
 from app.services.benchmark import detect_regression
 from app.services.report import format_regression_report
 
@@ -76,4 +79,11 @@ async def analyze_benchmark(payload: BenchmarkRequest):
     return {
         "analysis": BenchmarkAnalysis(**result),
         "report": report,
+    }
+
+
+@app.get("/benchmarks")
+async def get_benchmarks():
+    return {
+        "runs": get_benchmark_runs()
     }
