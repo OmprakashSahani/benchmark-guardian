@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 
 from app.db.database import initialize_database
+from app.github.auth import get_installation_access_token
+from app.github.comments import post_pull_request_comment
 from app.github.parser import parse_pull_request_event
 from app.models.benchmark import (
     AnalyzeResponse,
@@ -11,9 +13,9 @@ from app.repositories.benchmark_repository import (
     get_benchmark_runs,
     save_benchmark_run,
 )
+from app.security.webhook import verify_github_signature
 from app.services.benchmark import detect_regression
 from app.services.report import format_regression_report
-from app.security.webhook import verify_github_signature
 
 app = FastAPI()
 
@@ -43,11 +45,10 @@ async def github_webhook(request: Request):
 
     if not verify_github_signature(payload_bytes, signature):
         return {
-            "error": "invalid webhook signature"
+            "error": "invalid webhook signature",
         }
 
     payload = await request.json()
-
     event = request.headers.get("X-GitHub-Event", "unknown")
 
     if event == "pull_request":
@@ -60,6 +61,18 @@ async def github_webhook(request: Request):
         )
 
         report = format_regression_report(benchmark_result)
+
+        if pr_data["installation_id"] is not None:
+            access_token = get_installation_access_token(
+                pr_data["installation_id"]
+            )
+
+            post_pull_request_comment(
+                repository_name=pr_data["repository_name"],
+                pull_request_number=pr_data["pr_number"],
+                comment_body=report,
+                access_token=access_token,
+            )
 
         return {
             "event": event,
@@ -95,5 +108,5 @@ async def analyze_benchmark(payload: BenchmarkRequest):
 @app.get("/benchmarks")
 async def get_benchmarks():
     return {
-        "runs": get_benchmark_runs()
+        "runs": get_benchmark_runs(),
     }
