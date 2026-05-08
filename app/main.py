@@ -13,6 +13,7 @@ from app.repositories.benchmark_repository import (
 )
 from app.services.benchmark import detect_regression
 from app.services.report import format_regression_report
+from app.security.webhook import verify_github_signature
 
 app = FastAPI()
 
@@ -36,6 +37,15 @@ def health():
 
 @app.post("/webhook")
 async def github_webhook(request: Request):
+    payload_bytes = await request.body()
+
+    signature = request.headers.get("X-Hub-Signature-256", "")
+
+    if not verify_github_signature(payload_bytes, signature):
+        return {
+            "error": "invalid webhook signature"
+        }
+
     payload = await request.json()
 
     event = request.headers.get("X-GitHub-Event", "unknown")

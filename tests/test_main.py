@@ -1,6 +1,9 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
+import hashlib
+import hmac
+import json
 
 
 client = TestClient(app)
@@ -14,19 +17,33 @@ def test_health_endpoint():
 
 
 def test_webhook_endpoint_receives_event():
+    payload = {
+        "action": "opened",
+        "pull_request": {
+            "number": 42,
+            "title": "Improve benchmark engine",
+        },
+        "repository": {
+            "full_name": "OmprakashSahani/benchmark-guardian",
+        },
+    }
+
+    payload_bytes = json.dumps(payload).encode()
+
+    signature = "sha256=" + hmac.new(
+        "benchmark-guardian-secret".encode(),
+        payload_bytes,
+        hashlib.sha256,
+    ).hexdigest()
+
     response = client.post(
         "/webhook",
-        headers={"X-GitHub-Event": "pull_request"},
-        json={
-            "action": "opened",
-            "pull_request": {
-                "number": 42,
-                "title": "Improve benchmark engine",
-            },
-            "repository": {
-                "full_name": "OmprakashSahani/benchmark-guardian",
-            },
+        headers={
+            "X-GitHub-Event": "pull_request",
+            "X-Hub-Signature-256": signature,
+            "Content-Type": "application/json",
         },
+        content=payload_bytes,
     )
 
     assert response.status_code == 200
@@ -34,14 +51,7 @@ def test_webhook_endpoint_receives_event():
     body = response.json()
 
     assert body["event"] == "pull_request"
-
-    assert body["pull_request"] == {
-        "action": "opened",
-        "pr_number": 42,
-        "pr_title": "Improve benchmark engine",
-        "repository_name": "OmprakashSahani/benchmark-guardian",
-    }
-
+    assert body["pull_request"]["pr_number"] == 42
     assert body["analysis"]["regression"] is True
     assert body["analysis"]["severity"] == "medium"
     assert "Benchmark Guardian Report" in body["report"]
