@@ -3,6 +3,12 @@ from app.services.benchmark import detect_regression
 from app.services.report import format_regression_report
 from app.github.parser import parse_pull_request_event
 
+from app.models.benchmark import (
+    AnalyzeResponse,
+    BenchmarkAnalysis,
+    BenchmarkRequest,
+)
+
 app = FastAPI()
 
 
@@ -49,19 +55,19 @@ async def github_webhook(request: Request):
         "received": True,
         "event": event,
     }
-    
 
-@app.post("/analyze")
-async def analyze_benchmark(payload: dict):
+
+@app.post("/analyze", response_model=AnalyzeResponse)
+async def analyze_benchmark(payload: BenchmarkRequest):
     result = detect_regression(
-        baseline=payload["baseline"],
-        current=payload["current"],
-        threshold_percent=payload.get("threshold_percent", 5.0),
+        baseline=payload.baseline,
+        current=payload.current,
+        threshold_percent=payload.threshold_percent,
     )
 
     report = format_regression_report(result)
 
     return {
-        "analysis": result,
+        "analysis": BenchmarkAnalysis(**result),
         "report": report,
     }
