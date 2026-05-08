@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from app.services.benchmark import detect_regression
+from app.services.report import format_regression_report
 
 app = FastAPI()
 
@@ -41,4 +42,9 @@ async def analyze_benchmark(payload: dict):
         threshold_percent=payload.get("threshold_percent", 5.0),
     )
 
-    return result
+    report = format_regression_report(result)
+
+    return {
+        "analysis": result,
+        "report": report,
+    }

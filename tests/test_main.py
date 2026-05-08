@@ -38,9 +38,16 @@ def test_analyze_endpoint_detects_regression():
     )
 
     assert response.status_code == 200
-    assert response.json() == {
+
+    body = response.json()
+
+    assert body["analysis"] == {
         "baseline": 100.0,
         "current": 112.0,
         "change_percent": 12.0,
         "regression": True,
     }
+
+    assert "Benchmark Guardian Report" in body["report"]
+    assert "Regression detected" in body["report"]
+    assert "12.00%" in body["report"]
