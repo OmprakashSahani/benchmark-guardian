@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from app.services.benchmark import detect_regression
 
 app = FastAPI()
 
@@ -30,3 +31,14 @@ async def github_webhook(request: Request):
         "received": True,
         "event": event
     }
+
+
+@app.post("/analyze")
+async def analyze_benchmark(payload: dict):
+    result = detect_regression(
+        baseline=payload["baseline"],
+        current=payload["current"],
+        threshold_percent=payload.get("threshold_percent", 5.0),
+    )
+
+    return result

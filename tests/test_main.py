@@ -25,3 +25,22 @@ def test_webhook_endpoint_receives_event():
         "received": True,
         "event": "pull_request",
     }
+
+
+def test_analyze_endpoint_detects_regression():
+    response = client.post(
+        "/analyze",
+        json={
+            "baseline": 100.0,
+            "current": 112.0,
+            "threshold_percent": 5.0,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "baseline": 100.0,
+        "current": 112.0,
+        "change_percent": 12.0,
+        "regression": True,
+    }
