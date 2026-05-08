@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+benchmark_guardian.db
+__pycache__/
+.pytest_cache/

@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from app.services.benchmark import detect_regression
 from app.services.report import format_regression_report
 from app.github.parser import parse_pull_request_event
+from app.db.database import initialize_database
 
 from app.models.benchmark import (
     AnalyzeResponse,
@@ -10,6 +11,8 @@ from app.models.benchmark import (
 )
 
 app = FastAPI()
+
+initialize_database()
 
 
 @app.get("/")
