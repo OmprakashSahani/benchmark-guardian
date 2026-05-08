@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from app.services.benchmark import detect_regression
 from app.services.report import format_regression_report
+from app.github.parser import parse_pull_request_event
 
 app = FastAPI()
 
@@ -26,13 +27,29 @@ async def github_webhook(request: Request):
 
     event = request.headers.get("X-GitHub-Event", "unknown")
 
-    print(f"Received GitHub event: {event}")
+    if event == "pull_request":
+        pr_data = parse_pull_request_event(payload)
+
+        benchmark_result = detect_regression(
+            baseline=100.0,
+            current=112.0,
+            threshold_percent=5.0,
+        )
+
+        report = format_regression_report(benchmark_result)
+
+        return {
+            "event": event,
+            "pull_request": pr_data,
+            "analysis": benchmark_result,
+            "report": report,
+        }
 
     return {
         "received": True,
-        "event": event
+        "event": event,
     }
-
+    
 
 @app.post("/analyze")
 async def analyze_benchmark(payload: dict):
