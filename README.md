@@ -1,23 +1,117 @@
+<div align="center">
+
 # Benchmark Guardian
+### Automated benchmark regression detection for GitHub pull requests and ML infrastructure systems.
 
-Performance regression detection platform for GitHub pull requests.
+![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat-square&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-green?style=flat-square&logo=fastapi)
+![GitHub App](https://img.shields.io/badge/GitHub-App-black?style=flat-square&logo=github)
+![Tests](https://img.shields.io/badge/Tests-Passing-success?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
-Benchmark Guardian analyzes benchmark results, detects regressions, classifies severity, and generates GitHub-style performance reports for developer workflows and ML infrastructure systems.
+Benchmark Guardian automatically analyzes benchmark regressions, classifies severity, and posts rich multi-metric performance reports directly into GitHub pull requests.
+
+</div>
+
+---
+
+## Overview
+
+Benchmark Guardian is a developer infrastructure platform for automated benchmark regression detection in GitHub pull requests.
+
+The system analyzes benchmark results, detects performance regressions across multiple metrics, classifies severity levels, and posts automated reports directly into pull request discussions.
+
+It is designed for performance-critical systems such as:
+
+- ML infrastructure
+- Distributed training systems
+- Backend services
+- Optimization pipelines
+- Developer tooling platforms
+
+---
+
+## Problem Statement
+
+Performance regressions are often difficult to detect during code review workflows.
+
+A pull request may:
+
+- Increase latency
+- Increase memory usage
+- Reduce throughput
+- Degrade scaling efficiency
+- Introduce infrastructure bottlenecks
+
+without immediately failing tests.
+
+In large-scale ML systems and infrastructure platforms, unnoticed regressions can significantly increase:
+
+- Compute cost
+- GPU utilization
+- Training time
+- Operational complexity
+
+Benchmark Guardian automates regression detection directly inside GitHub pull requests through:
+
+- Webhook-driven analysis
+- Benchmark comparison
+- Severity classification
+- Automated developer feedback
+
+---
+
+## Live GitHub App Demo
+
+### Automated PR Analysis Comment
+
+![Benchmark Guardian PR Comment](assets/screenshots/pr-comment-demo.png)
+
+Benchmark Guardian automatically:
+
+- Receives GitHub webhook events
+- Authenticates as a GitHub App
+- Analyzes benchmark regressions
+- Generates multi-metric reports
+- Posts automated PR comments
+
+---
+
+### Live Webhook Processing
+
+![Backend Terminal](assets/screenshots/backend-terminal.png)
+
+The backend processes:
+
+- GitHub webhook events
+- Pull request metadata
+- Benchmark analysis workflows
+- Automated comment publishing
+
+---
+
+### GitHub Webhook Deliveries
+
+![Webhook Deliveries](assets/screenshots/webhook-delivery.png)
+
+GitHub successfully delivers real webhook events to Benchmark Guardian through the public FastAPI backend.
 
 ---
 
 ## Features
 
-- GitHub App webhook integration
-- Pull request event parsing
-- Benchmark regression detection
+- Real GitHub App integration
+- Secure webhook signature verification
+- Automated PR comment publishing
+- Multi-metric benchmark analysis
+- Latency regression detection
+- Memory regression detection
+- Throughput analysis
 - Severity classification
-- GitHub-style markdown reports
 - SQLite persistence layer
 - Typed FastAPI APIs
-- Repository abstraction layer
-- Automated testing
-- Secure webhook signature verification
+- Automated testing + API mocking
+- Event-driven backend architecture
 
 ---
 
@@ -25,23 +119,15 @@ Benchmark Guardian analyzes benchmark results, detects regressions, classifies s
 
 ```mermaid
 flowchart TD
-
-    A[GitHub Pull Request]
-    --> B[GitHub Webhook]
-
+    A[GitHub Pull Request] --> B[GitHub Webhook]
     B --> C[FastAPI Backend]
-
-    C --> D[PR Event Parser]
-
-    D --> E[Benchmark Analysis Engine]
-
-    E --> F[Severity Classification]
-
-    F --> G[Markdown Report Generator]
-
-    G --> H[(SQLite Storage)]
-
-    G --> I[GitHub-style PR Report]
+    C --> D[Webhook Signature Verification]
+    D --> E[PR Event Parser]
+    E --> F[Multi-Metric Benchmark Analysis]
+    F --> G[Severity Classification]
+    G --> H[Markdown Report Generator]
+    H --> I[(SQLite Storage)]
+    H --> J[GitHub PR Comment API]
 ```
 
 ---
@@ -53,40 +139,23 @@ flowchart TD
 
 ## 🔴 Status: Regression detected
 
-| Metric | Value |
-|---|---|
-| Baseline | `100.0` |
-| Current | `120.0` |
-| Change | `20.00%` |
-| Severity | `high` |
-| Regression | `True` |
+| Metric | Baseline | Current | Change | Severity | Regression |
+|---|---:|---:|---:|---|---|
+| latency_ms | 100 | 118 | +18% | 🔴 high | True |
+| memory_mb | 2048 | 2500 | +22% | 🔴 high | True |
+| throughput | 512 | 470 | -8% | 🟡 medium | False |
 ```
 
 ---
 
 ## API Example
 
-### Analyze Benchmark
+### Analyze Benchmark Metrics
 
 ```bash
 curl -X POST http://127.0.0.1:8000/analyze \
 -H "Content-Type: application/json" \
 -d '{"baseline":100,"current":120}'
-```
-
-### Response
-
-```json
-{
-  "analysis": {
-    "baseline": 100.0,
-    "current": 120.0,
-    "change_percent": 20.0,
-    "regression": true,
-    "severity": "high"
-  },
-  "report": "# Benchmark Guardian Report ..."
-}
 ```
 
 ---
@@ -97,8 +166,10 @@ curl -X POST http://127.0.0.1:8000/analyze \
 - FastAPI
 - SQLite
 - Pytest
+- GitHub Apps
 - GitHub Webhooks
 - Pydantic
+- JWT Authentication
 
 ---
 
@@ -130,6 +201,7 @@ Create `.env`:
 
 ```env
 GITHUB_WEBHOOK_SECRET=your-webhook-secret
+GITHUB_APP_ID=your-app-id
 ```
 
 ---
@@ -138,14 +210,16 @@ GITHUB_WEBHOOK_SECRET=your-webhook-secret
 
 ```text
 app/
+├── analysis/
 ├── db/
 ├── github/
 ├── models/
 ├── repositories/
 ├── security/
-├── services/
+└── services/
 
 tests/
+assets/
 ```
 
 ---
@@ -155,19 +229,18 @@ tests/
 Benchmark Guardian aims to become a performance intelligence platform for ML systems and developer infrastructure.
 
 Future roadmap:
-- Multi-metric benchmark analysis
-- GPU memory regression detection
-- Throughput analysis
+
+- GPU memory regression analysis
 - Distributed training metrics
-- PR comment automation
-- Benchmark dashboards
 - Scaling efficiency analysis
-- CI benchmark integrations
+- CI benchmark ingestion
+- Benchmark dashboards
+- Historical trend analysis
+- Benchmark artifact uploads
+- ML systems observability
 
 ---
 
 ## License
 
 MIT
-
-Benchmark Guardian live PR automation demo.

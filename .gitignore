@@ -220,3 +220,5 @@ __marimo__/
 benchmark_guardian.db
 __pycache__/
 .pytest_cache/
+
+benchmark_guardian_private_key.pem
