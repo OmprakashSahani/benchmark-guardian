@@ -61,6 +61,13 @@ Benchmark Guardian automates regression detection directly inside GitHub pull re
 
 ---
 
+
+## Architecture
+
+![System Architecture](/assets/screenshots/benchmark-guardian-architecture.png)
+
+---
+
 ## Live GitHub App Demo
 
 ### Automated PR Analysis Comment
@@ -112,23 +119,6 @@ GitHub successfully delivers real webhook events to Benchmark Guardian through t
 - Typed FastAPI APIs
 - Automated testing + API mocking
 - Event-driven backend architecture
-
----
-
-## Architecture
-
-```mermaid
-flowchart TD
-    A[GitHub Pull Request] --> B[GitHub Webhook]
-    B --> C[FastAPI Backend]
-    C --> D[Webhook Signature Verification]
-    D --> E[PR Event Parser]
-    E --> F[Multi-Metric Benchmark Analysis]
-    F --> G[Severity Classification]
-    G --> H[Markdown Report Generator]
-    H --> I[(SQLite Storage)]
-    H --> J[GitHub PR Comment API]
-```
 
 ---
 
